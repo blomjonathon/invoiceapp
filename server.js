@@ -37,7 +37,12 @@ const startServer = async () => {
     }
 };
 
-// Routes
+// Root route
+app.get('/', (req, res) => {
+    res.send('Invoice API is running. Use /api/invoices for invoice operations.');
+});
+
+// API Routes
 app.post('/api/invoices', async (req, res) => {
     try {
         const invoice = await Invoice.create(req.body);
@@ -76,7 +81,10 @@ app.delete('/api/invoices/:id', async (req, res) => {
 
 // Health check endpoint
 app.get('/health', (req, res) => {
-    res.status(200).json({ status: 'ok' });
+    res.status(200).json({ 
+        status: 'ok',
+        database: sequelize.authenticate() ? 'connected' : 'disconnected'
+    });
 });
 
 startServer(); 
