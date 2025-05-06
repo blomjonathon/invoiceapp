@@ -1,4 +1,10 @@
 require('dotenv').config();
+
+// Set database URL if not in environment
+if (!process.env.DATABASE_URL) {
+    process.env.DATABASE_URL = 'postgresql://invoice_user:47dLkMdbpVtq2CF2XUSrisT4TXddFIm7@dpg-d0d6843uibrs73bq7fl0-a/invoice_db_jjj5';
+}
+
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
@@ -13,17 +19,23 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Database Connection and Sync
-sequelize.authenticate()
-    .then(() => {
+const startServer = async () => {
+    try {
+        await sequelize.authenticate();
         console.log('Connected to PostgreSQL database');
-        return sequelize.sync();
-    })
-    .then(() => {
+        
+        await sequelize.sync();
         console.log('Database synchronized');
-    })
-    .catch(err => {
-        console.error('Database connection error:', err);
-    });
+
+        const PORT = process.env.PORT || 3000;
+        app.listen(PORT, () => {
+            console.log(`Server is running on port ${PORT}`);
+        });
+    } catch (error) {
+        console.error('Unable to start server:', error);
+        process.exit(1);
+    }
+};
 
 // Routes
 app.post('/api/invoices', async (req, res) => {
@@ -62,7 +74,9 @@ app.delete('/api/invoices/:id', async (req, res) => {
     }
 });
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
-}); 
+// Health check endpoint
+app.get('/health', (req, res) => {
+    res.status(200).json({ status: 'ok' });
+});
+
+startServer(); 

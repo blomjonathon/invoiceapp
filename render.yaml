@@ -8,9 +8,7 @@ services:
       - key: NODE_ENV
         value: production
       - key: DATABASE_URL
-        fromDatabase:
-          name: invoice-db
-          property: connectionString
+        value: postgresql://invoice_user:47dLkMdbpVtq2CF2XUSrisT4TXddFIm7@dpg-d0d6843uibrs73bq7fl0-a/invoice_db_jjj5
 
 databases:
   - name: invoice-db
